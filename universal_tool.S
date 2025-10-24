@@ -1,14 +1,18 @@
 .intel_syntax noprefix
 
+.set EXECRO_BASE, 0x08000000
+
 .extern _text_vma
 .extern _binary_end
 
-
 .global _start
+.global _init
 
 .section .init
+_init:
 # https://dxrgrabowski.github.io/2024/09/27/3-tiniest-elf/
 # https://nathanotterness.com/2021/10/tiny_elf_modernized.html
+#  https://man7.org/linux/man-pages/man5/elf.5.html
 	.byte  0x7f, 0x45, 0x4c, 0x46, 0x02, 0x01, 0x01, 0x00
 
 	// 8 free bytes
@@ -40,12 +44,20 @@ elf_pgm_hdr:
 	.quad  0    # p_paddr
 	.quad _binary_end # p_filesz
 	.quad _binary_end # p_memsz
-	.int 0x00 # p_flags
-	.int 0x20 # p_align
+	.int 0x20 # p_flags
+	.int 0x00 # p_align
 	// Size 0x38
+
 	.int 0x02  # p_type = PT_DYNAMIC
 	.int 0x05  # p_flags
-	.quad 0    # 	
+	.quad 0 # p_offset
+	.quad 0 # p_vaddr
+	.quad PT_DYNAMIC_OFFSET    # p_offset
+	.quad PT_DYNAMIC # p_paddr
+	.quad PT_DYNAMIC_END # p_filesz
+	.quad PT_DYNAMIC_END # p_memesz
+	.int 0x00 # p_flags
+	.int 0x20 # p_align
 
 
 // Could do section header (For DLL)
@@ -65,8 +77,17 @@ _start:
 	mov edi, 0     #   EXIT_SUCCESS
 	syscall        # );
 
+
+
+PT_DYNAMIC:
+	.set PT_DYNAMIC_OFFSET, . - EXECRO_BASE 
+
+	
+	.set PT_DYNAMIC_END, . - PT_DYNAMIC
+
 .section .rodata
 msg:
 	.ascii "Hello, world!\n"
 	.set msglen, . - msg	
+
 
