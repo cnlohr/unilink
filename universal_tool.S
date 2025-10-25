@@ -46,6 +46,8 @@ elf_section_headers:
 	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  SHF_ALLOC|SHF_EXECINSTR,   (plt_table_start), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x01, 0, 0x10, 0x10 )
 	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  SHF_ALLOC,                 (got_table_start), got_table_start-elf_header, got_table_end-got_table_start, 0x03, 0, 0x08, 0x08 )
 
+	Elf64_Shdr( STRLK(str_got_plt),  SHT_PROGBITS,  SHF_ALLOC,                 (gotplt_table_start), gotplt_table_start-elf_header, gotplt_table_end-gotplt_table_start, 0x03, 0, 0x08, 0x08 )
+
 	// for nix
 	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             (str_interp), str_interp-elf_header, str_interp_end-str_interp, 0, 0, 0x01, 0x00 )
 elf_section_headers_end:
@@ -62,7 +64,7 @@ dynamic_section:
 
 	DYNAMICENTRY( DT_RELA, dt_rela_start )
 	DYNAMICENTRY( DT_RELASZ, dt_rela_end - dt_rela_start )
-	DYNAMICENTRY( DT_RELAENT, 24 );  // ???
+	DYNAMICENTRY( DT_RELAENT, 24 ); // Size of each relaent.
 
 	DYNAMICENTRY( DT_FLAGS, 8 /* Bind now */ );
 
@@ -80,6 +82,7 @@ str_dynamic:	.ascii ".dynamic\0"
 str_shstrtab:	.ascii ".shstrtab\0"
 str_dynstr:     .ascii ".dynstr\0"
 str_dynsym:     .ascii ".dynsym\0"
+str_got_plt:    .ascii ".got.plt\0"
 str_plt:        .ascii ".plt\0"
 str_got:        .ascii ".got\0"
 str_interp_title: .ascii ".interp\0"
@@ -93,15 +96,13 @@ plt_table_end:
 
 got_table_start:
 	.Elf64_Xword dynamic_section
-	.Elf64_Xword 0
-	.Elf64_Xword 0
 	.Elf64_Xword 0 //plt_table_start-elf_header+0x10 //???? 16 bytes into the PLT? (TODO remove me)
-	.Elf64_Xword 0
-	.Elf64_Xword 0
-	.Elf64_Xword 0
-	.Elf64_Xword 0
-	.Elf64_Xword 0
 got_table_end:
+
+gotplt_table_start:
+	.Elf64_Xword 0
+	.Elf64_Xword 0
+gotplt_table_end:
 
 dt_rela_start:
 	.Elf64_Xword 0 // Start location?
