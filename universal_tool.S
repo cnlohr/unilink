@@ -53,6 +53,9 @@ elf_section_headers_end:
 
 dynamic_section:
 	DYNAMICENTRY( DT_NEEDED, str_libX11 - dynstr_start );
+	DYNAMICENTRY( DT_STRTAB, dynstr_start );
+	DYNAMICENTRY( DT_STRSZ, dynstr_end-dynstr_start );
+
 	//DYNAMICENTRY( DT_PLTGOT, got_table_start - elf_header );
 dynamic_end:
 
