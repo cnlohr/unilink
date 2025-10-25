@@ -5,6 +5,7 @@
 #define Elf64_Off    quad
 #define Elf64_Sxword quad
 
+// 64 bytes
 #define Elf64_Shdr( sh_name, sh_type, sh_flags, sh_addr, sh_offset, sh_size, sh_link, sh_info, sh_addralign, sh_entsize ) \
 	.Elf64_Word  sh_name; \
 	.Elf64_Word  sh_type; \

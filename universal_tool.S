@@ -33,23 +33,39 @@ elf_header:
 // Program header
 elf_pgm_hdr:
 	// PT_LOAD
-	Elf64_Phdr( PT_LOAD,    PF_X | PF_R, 0,                     init_start,      0,                     _binary_end, _binary_end, 0 );
+	Elf64_Phdr( PT_LOAD,    PF_X | PF_R | PF_W, 0,           init_start,      0,                     _binary_end, _binary_end, 0 );
 	Elf64_Phdr( PT_DYNAMIC, PF_W | PF_R, PHYS(dynamic_section), dynamic_section, PHYS(dynamic_section), dynamic_end-dynamic_section, dynamic_end-dynamic_section, 8 );
 	Elf64_Phdr( PT_INTERP,  PF_R,        PHYS(str_interp), str_interp, PHYS(str_interp), str_interp_end-str_interp, str_interp_end-str_interp, 1 );
 elf_pgm_hdr_end:
 
 elf_section_headers:
-	Elf64_Shdr( STRLK(str_dynamic),  SHT_DYNAMIC, SHF_ALLOC|SHF_WRITE, (dynamic_section), dynamic_section-elf_header, dynamic_end-dynamic_section,   1, 0, 8, 0x10 )
-	Elf64_Shdr( STRLK(str_shstrtab), SHT_STRTAB,  0,                   (string_table), string_table-elf_header,    string_table_end-string_table, 0, 0, 1, 0x00 )
-	Elf64_Shdr( STRLK(str_dynstr),   SHT_STRTAB,  0,                   (dynstr_start), dynstr_start-elf_header,    dynstr_end-dynstr_start,       0, 0, 8, 0x00 )
-	Elf64_Shdr( STRLK(str_dynsym),   SHT_DYNSYM,  0,                   (dynsym_start), dynsym_start-elf_header,    0x18,       2, (dynsym_end-dynsym_start)/0x18, 8, 0x18 )
-	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  SHF_ALLOC|SHF_EXECINSTR,   (plt_table_start), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x01, 0, 0x10, 0x10 )
-	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  SHF_ALLOC,                 (got_table_start), got_table_start-elf_header, got_table_end-got_table_start, 0x03, 0, 0x08, 0x08 )
+	Elf64_Shdr( STRLK(str_dynamic),  SHT_DYNAMIC, SHF_ALLOC|SHF_WRITE,
+		(dynamic_section), dynamic_section-elf_header, dynamic_end-dynamic_section,   0x02 /* Point to .dynstr */, 0, 8, 0x10 )
 
-	Elf64_Shdr( STRLK(str_got_plt),  SHT_PROGBITS,  SHF_ALLOC,                 (gotplt_table_start), gotplt_table_start-elf_header, gotplt_table_end-gotplt_table_start, 0x03, 0, 0x08, 0x08 )
+	Elf64_Shdr( STRLK(str_shstrtab), SHT_STRTAB,  0,
+		(string_table), string_table-elf_header,    string_table_end-string_table, 0, 0, 1, 0x00 )
 
-	// for nix
-	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             (str_interp), str_interp-elf_header, str_interp_end-str_interp, 0, 0, 0x01, 0x00 )
+	Elf64_Shdr( STRLK(str_dynstr),   SHT_STRTAB,  0,
+		(dynstr_start), dynstr_start-elf_header,    dynstr_end-dynstr_start,       0, 0, 8, 0x00 )
+
+	Elf64_Shdr( STRLK(str_rela_dyn),   SHT_RELA,  SHF_ALLOC,
+		(rela_dyn_start), rela_dyn_start-elf_header, rela_dyn_end-rela_dyn_start,  0x07 /* Point to .dynsym */, 0, 8, 0x18 )
+
+	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  SHF_ALLOC|SHF_EXECINSTR,
+		(plt_table_start), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x00, 0, 0x10, 0x10 )
+
+	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  SHF_ALLOC|SHF_WRITE,
+		(got_table_start), got_table_start-elf_header, got_table_end-got_table_start, 0x00, 0, 0x08, 0x08 )
+
+	Elf64_Shdr( STRLK(str_got_plt),  SHT_PROGBITS,  SHF_ALLOC,
+		(gotplt_table_start), gotplt_table_start-elf_header, gotplt_table_end-gotplt_table_start, 0x00, 0, 0x08, 0x08 )
+
+sh_dynsym_def:
+	Elf64_Shdr( STRLK(str_dynsym),   SHT_DYNSYM,  0,
+		(dynsym_start), dynsym_start-elf_header,    dynsym_end-dynsym_start,   0x02 /* Point to .dynstr */, (dynsym_end-dynsym_start)/0x18, 8, 0x18 )
+
+	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,
+		(str_interp), str_interp-elf_header, str_interp_end-str_interp, 0, 0, 0x01, 0x00 ) 	// for nix
 elf_section_headers_end:
 
 #define DYNAMICENTRY( type, addr ) \
@@ -62,13 +78,13 @@ dynamic_section:
 	DYNAMICENTRY( DT_SYMTAB, symtab_start );
 	DYNAMICENTRY( DT_STRSZ, dynstr_end-dynstr_start );
 
-	DYNAMICENTRY( DT_RELA, dt_rela_start )
-	DYNAMICENTRY( DT_RELASZ, dt_rela_end - dt_rela_start )
+	DYNAMICENTRY( DT_RELA, rela_dyn_start )
+	DYNAMICENTRY( DT_RELASZ, rela_dyn_end - rela_dyn_start )
 	DYNAMICENTRY( DT_RELAENT, 24 ); // Size of each relaent.
 
 	DYNAMICENTRY( DT_FLAGS, 8 /* Bind now */ );
 
-	//DYNAMICENTRY( DT_PLTGOT, got_table_start - elf_header );
+	//DYNAMICENTRY( DT_PLTGOT, gotplt_table_start - elf_header );
 dynamic_end:
 
 symtab_start:
@@ -82,7 +98,8 @@ str_dynamic:	.ascii ".dynamic\0"
 str_shstrtab:	.ascii ".shstrtab\0"
 str_dynstr:     .ascii ".dynstr\0"
 str_dynsym:     .ascii ".dynsym\0"
-str_got_plt:    .ascii ".got.plt\0"
+str_got_plt:    .ascii ".plt.got\0"
+str_rela_dyn:   .ascii ".rela.dyn\0"
 str_plt:        .ascii ".plt\0"
 str_got:        .ascii ".got\0"
 str_interp_title: .ascii ".interp\0"
@@ -95,23 +112,30 @@ plt_table_start:
 plt_table_end:
 
 got_table_start:
-	.Elf64_Xword dynamic_section
-	.Elf64_Xword 0 //plt_table_start-elf_header+0x10 //???? 16 bytes into the PLT? (TODO remove me)
+//	.Elf64_Xword dynamic_section //dynamic_section (Originally)
+//	.Elf64_Xword gotplt_table_start //plt_table_start-elf_header+0x10 //???? 16 bytes into the PLT? (TODO remove me)
+//	.Elf64_Xword dynamic_section //dynamic_section (Originally)
+//	.Elf64_Xword plt_table_start //plt_table_start-elf_header+0x10 //???? 16 bytes into the PLT? (TODO remove me)
+//	.Elf64_Xword plt_table_start // Address
+//	.Elf64_Xword 0x000100000006 // Info
+//	.Elf64_Xword gotplt_table_start //????
+//	.Elf64_Xword dynamic_section
+	.Elf64_Xword 0
+//	.Elf64_Xword str_XOpenDisplay
+//	.Elf64_Xword 0
+
 got_table_end:
 
-gotplt_table_start:
-	.Elf64_Xword 0
-	.Elf64_Xword 0
-gotplt_table_end:
 
-dt_rela_start:
-	.Elf64_Xword 0 // Start location?
-	.Elf64_Xword 0 // Number of entries?
-	//.Elf64_Xword 0 // ???
-	// I think this is important?
-dt_rela_end:
+rela_dyn_start:  // Also DT_RELA
+	.Elf64_Xword got_table_start // Address  (Should this be plt_table_start or got_table_Start)?
+	.Elf64_Xword 0x000100000006 // Info
+	.Elf64_Xword 0 //gotplt_table_start //????
+
+rela_dyn_end:
 
 dynstr_start:
+dynstr_empty:     .ascii "\0"
 str_libX11:       .ascii "libX11.so.6\0"
 str_XOpenDisplay: .ascii "XOpenDisplay\0"
 dynstr_end:
@@ -125,8 +149,15 @@ dynstr_end:
 	.quad Size;
 
 dynsym_start:
+	// Dunno why - need a empty entry first
+	DYNSYM( dynstr_empty, 0x00, 0x00, 0, 0, 0 );
 	DYNSYM( str_XOpenDisplay, 0x12, 0x00, 0, 0, 0 );
 dynsym_end:
+
+gotplt_table_start:
+	.byte 0xf3, 0x0f, 0x1e, 0xfa, 0xe9, 0x77, 0xff, 0xff
+	.byte 0x00, 0x00, 0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00
+gotplt_table_end:
 
 
 
