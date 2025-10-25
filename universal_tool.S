@@ -47,7 +47,7 @@ elf_section_headers:
 	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  0,                 PHYS(elf_header), got_table_start-elf_header, got_table_end-got_table_start, 0x08, 0, 0x08, 0x00 )
 
 	// for nix
-	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             PHYS(elf_header), str_interp-elf_header, str_interp-elf_header, str_interp_end-str_interp, str_interp_end-str_interp, 0x08, 0x00 )
+	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             PHYS(elf_header), str_interp-elf_header, str_interp_end-str_interp, 0, 0, 0x01, 0x00 )
 elf_section_headers_end:
 
 #define DYNAMICENTRY( type, addr ) \
