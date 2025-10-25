@@ -39,15 +39,15 @@ elf_pgm_hdr:
 elf_pgm_hdr_end:
 
 elf_section_headers:
-	Elf64_Shdr( STRLK(str_dynamic),  SHT_DYNAMIC, SHF_ALLOC|SHF_WRITE, PHYS(dynamic_section), dynamic_section-elf_header, dynamic_end-dynamic_section,   1, 0, 8, 0x10 )
-	Elf64_Shdr( STRLK(str_shstrtab), SHT_STRTAB,  0,                   PHYS(string_table), string_table-elf_header,    string_table_end-string_table, 0, 0, 1, 0x00 )
-	Elf64_Shdr( STRLK(str_dynstr),   SHT_STRTAB,  0,                   PHYS(dynstr_start), dynstr_start-elf_header,    dynstr_end-dynstr_start,       0, 0, 8, 0x00 )
-	Elf64_Shdr( STRLK(str_dynsym),   SHT_DYNSYM,  0,                   PHYS(dynsym_start), dynsym_start-elf_header,    0x18,       2, (dynsym_end-dynsym_start)/0x18, 8, 0x18 )
-	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  SHF_ALLOC|SHF_EXECINSTR,   PHYS(plt_table_start), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x00, 0, 0x00, 0x10 )
-	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  SHF_ALLOC,                 PHYS(got_table_start), got_table_start-elf_header, got_table_end-got_table_start, 0x00, 0, 0x08, 0x08 )
+	Elf64_Shdr( STRLK(str_dynamic),  SHT_DYNAMIC, SHF_ALLOC|SHF_WRITE, (dynamic_section), dynamic_section-elf_header, dynamic_end-dynamic_section,   1, 0, 8, 0x10 )
+	Elf64_Shdr( STRLK(str_shstrtab), SHT_STRTAB,  0,                   (string_table), string_table-elf_header,    string_table_end-string_table, 0, 0, 1, 0x00 )
+	Elf64_Shdr( STRLK(str_dynstr),   SHT_STRTAB,  0,                   (dynstr_start), dynstr_start-elf_header,    dynstr_end-dynstr_start,       0, 0, 8, 0x00 )
+	Elf64_Shdr( STRLK(str_dynsym),   SHT_DYNSYM,  0,                   (dynsym_start), dynsym_start-elf_header,    0x18,       2, (dynsym_end-dynsym_start)/0x18, 8, 0x18 )
+	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  SHF_ALLOC|SHF_EXECINSTR,   (plt_table_start), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x01, 0, 0x10, 0x10 )
+	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  SHF_ALLOC,                 (got_table_start), got_table_start-elf_header, got_table_end-got_table_start, 0x03, 0, 0x08, 0x08 )
 
 	// for nix
-	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             PHYS(elf_header), str_interp-elf_header, str_interp_end-str_interp, 0, 0, 0x01, 0x00 )
+	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             (str_interp), str_interp-elf_header, str_interp_end-str_interp, 0, 0, 0x01, 0x00 )
 elf_section_headers_end:
 
 #define DYNAMICENTRY( type, addr ) \
