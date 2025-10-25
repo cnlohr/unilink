@@ -57,7 +57,7 @@ dynamic_section:
 	DYNAMICENTRY( DT_SYMTAB, symtab_start );
 	DYNAMICENTRY( DT_STRSZ, dynstr_end-dynstr_start );
 
-	DYNAMICENTRY( DT_RELA, dt_rela_start - elf_header )
+	DYNAMICENTRY( DT_RELA, dt_rela_start )
 	DYNAMICENTRY( DT_RELASZ, dt_rela_end - dt_rela_start )
 	DYNAMICENTRY( DT_RELAENT, 24 );  // ???
 
