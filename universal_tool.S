@@ -54,10 +54,20 @@ elf_section_headers_end:
 dynamic_section:
 	DYNAMICENTRY( DT_NEEDED, str_libX11 - dynstr_start );
 	DYNAMICENTRY( DT_STRTAB, dynstr_start );
+	DYNAMICENTRY( DT_SYMTAB, symtab_start );
 	DYNAMICENTRY( DT_STRSZ, dynstr_end-dynstr_start );
+
+	DYNAMICENTRY( DT_RELA, dt_rela_start - elf_header )
+	DYNAMICENTRY( DT_RELASZ, dt_rela_end - dt_rela_start )
+	DYNAMICENTRY( DT_RELAENT, 24 );  // ???
+
+	DYNAMICENTRY( DT_FLAGS, 8 /* Bind now */ );
 
 	//DYNAMICENTRY( DT_PLTGOT, got_table_start - elf_header );
 dynamic_end:
+
+symtab_start:
+symtab_end:
 
 string_table:
 str_dynamic:	.ascii ".dynamic\0"
@@ -80,16 +90,23 @@ plt_table_start:
 plt_table_end:
 
 got_table_start:	
-	.Elf64_Addr dynamic_section
-	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr plt_table_start-elf_header+0x10 //???? 16 bytes into the PLT? (TODO remove me)
-	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr 0
+	.Elf64_Xword dynamic_section
+	.Elf64_Xword 0
+	.Elf64_Xword 0
+	.Elf64_Xword 0 //plt_table_start-elf_header+0x10 //???? 16 bytes into the PLT? (TODO remove me)
+	.Elf64_Xword 0
+	.Elf64_Xword 0
+	.Elf64_Xword 0
+	.Elf64_Xword 0
+	.Elf64_Xword 0
 got_table_end:
+
+dt_rela_start:
+	.Elf64_Xword 0 // Start location?
+	.Elf64_Xword 0 // Number of entries?
+	.Elf64_Xword 0 // ???
+	// I think this is important?
+dt_rela_end:
 
 dynstr_start:
 str_libX11:       .ascii "libX11.so.6\0"
