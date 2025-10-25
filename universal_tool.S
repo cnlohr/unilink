@@ -43,8 +43,8 @@ elf_section_headers:
 	Elf64_Shdr( STRLK(str_shstrtab), SHT_STRTAB,  0,                   PHYS(elf_header), string_table-elf_header,    string_table_end-string_table, 0, 0, 1, 0x00 )
 	Elf64_Shdr( STRLK(str_dynstr),   SHT_STRTAB,  0,                   PHYS(elf_header), dynstr_start-elf_header,    dynstr_end-dynstr_start,       0, 0, 8, 0x00 )
 	Elf64_Shdr( STRLK(str_dynsym),   SHT_DYNSYM,  0,                   PHYS(elf_header), dynsym_start-elf_header,    0x18,       2, (dynsym_end-dynsym_start)/0x18, 8, 0x18 )
-	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  0,                 PHYS(elf_header), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x10, (plt_table_end-plt_table_start)/0x10, 0x00, 0x00 )
-	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  0,                 PHYS(elf_header), got_table_start-elf_header, got_table_end-got_table_start, 0x08, 0, 0x08, 0x00 )
+	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  SHF_ALLOC|SHF_EXECINSTR,   PHYS(elf_header), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x10, 0, 0x00, 0x00 )
+	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  SHF_ALLOC,                 PHYS(elf_header), got_table_start-elf_header, got_table_end-got_table_start, 0x08, 0, 0x08, 0x00 )
 
 	// for nix
 	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             PHYS(elf_header), str_interp-elf_header, str_interp_end-str_interp, 0, 0, 0x01, 0x00 )
