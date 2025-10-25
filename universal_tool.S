@@ -42,9 +42,12 @@ elf_section_headers:
 	Elf64_Shdr( STRLK(str_dynamic),  SHT_DYNAMIC, SHF_ALLOC|SHF_WRITE, PHYS(elf_header), dynamic_section-elf_header, dynamic_end-dynamic_section,   1, 0, 8, 0x10 )
 	Elf64_Shdr( STRLK(str_shstrtab), SHT_STRTAB,  0,                   PHYS(elf_header), string_table-elf_header,    string_table_end-string_table, 0, 0, 1, 0x00 )
 	Elf64_Shdr( STRLK(str_dynstr),   SHT_STRTAB,  0,                   PHYS(elf_header), dynstr_start-elf_header,    dynstr_end-dynstr_start,       0, 0, 8, 0x00 )
-	Elf64_Shdr( STRLK(str_dynsym),   SHT_DYNSYM,  0,                   PHYS(elf_header), dynsym_start-elf_header,    dynsym_end-dynsym_start,       2, (dynsym_end-dynsym_start)/0x18, 8, 0x18 )
-	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  0,                 PHYS(elf_header), plt_table_start-elf_header, plt_table_end-plt_table_start, 0, (plt_table_end-plt_table_start)/0x10, 0x10, 0x00 )
-	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  0,                 PHYS(elf_header), got_table_start-elf_header, got_table_end-got_table_start, 0, 0, 0x08, 0x00 )
+	Elf64_Shdr( STRLK(str_dynsym),   SHT_DYNSYM,  0,                   PHYS(elf_header), dynsym_start-elf_header,    0x18,       2, (dynsym_end-dynsym_start)/0x18, 8, 0x18 )
+	Elf64_Shdr( STRLK(str_plt),      SHT_PROGBITS,  0,                 PHYS(elf_header), plt_table_start-elf_header, plt_table_end-plt_table_start, 0x10, (plt_table_end-plt_table_start)/0x10, 0x00, 0x00 )
+	Elf64_Shdr( STRLK(str_got),      SHT_PROGBITS,  0,                 PHYS(elf_header), got_table_start-elf_header, got_table_end-got_table_start, 0x08, 0, 0x08, 0x00 )
+
+	// for nix
+	Elf64_Shdr( STRLK(str_interp_title), SHT_PROGBITS,  0,             PHYS(elf_header), str_interp-elf_header, str_interp-elf_header, str_interp_end-str_interp, str_interp_end-str_interp, 0x08, 0x00 )
 elf_section_headers_end:
 
 #define DYNAMICENTRY( type, addr ) \
@@ -67,6 +70,9 @@ dynamic_section:
 dynamic_end:
 
 symtab_start:
+	.Elf64_Addr 0
+	.Elf64_Addr 0
+	.Elf64_Addr 0
 symtab_end:
 
 string_table:
@@ -76,20 +82,16 @@ str_dynstr:     .ascii ".dynstr\0"
 str_dynsym:     .ascii ".dynsym\0"
 str_plt:        .ascii ".plt\0"
 str_got:        .ascii ".got\0"
+str_interp_title: .ascii ".interp\0"
 str_interp:     .ascii "/lib64/ld-linux-x86-64.so.2\0"; str_interp_end:
 string_table_end:
 
 plt_table_start:
 	.Elf64_Addr 0
 	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr 0
-	.Elf64_Addr 0
 plt_table_end:
 
-got_table_start:	
+got_table_start:
 	.Elf64_Xword dynamic_section
 	.Elf64_Xword 0
 	.Elf64_Xword 0
@@ -104,7 +106,7 @@ got_table_end:
 dt_rela_start:
 	.Elf64_Xword 0 // Start location?
 	.Elf64_Xword 0 // Number of entries?
-	.Elf64_Xword 0 // ???
+	//.Elf64_Xword 0 // ???
 	// I think this is important?
 dt_rela_end:
 
